@@ -25,13 +25,15 @@ app.get('/historicoIPCA/calculo',(req, res) =>{
   const mesFinal = parseInt(req.query.mesFinal)
   const anoFinal = parseInt(req.query.anoFinal)
 
-  let resultado = servicos.calculaIPCA(valor, mesInicial, anoInicial, mesFinal, anoFinal)
-
-  if(resultado){
-    res.json({'resultado' : resultado})
-  } else{
-    res.status(404).json({'Erro': 'parâmetros inválidos'})
+  if (servicos.validacaoErro(valor, mesInicial, anoInicial, mesFinal, anoFinal)) {
+    res.status(400).json({ erro: 'Parâmetros inválidos' });
+    return;
   }
+
+
+  const resultado = servicos.calculaIPCA(valor, mesInicial, anoInicial, mesFinal, anoFinal)
+  res.json({'resultado' : resultado})
+  
 })
 
 app.get('/historicoIPCA/:id',(req,res)=>{
