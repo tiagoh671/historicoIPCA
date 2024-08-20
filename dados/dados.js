@@ -103,15 +103,3 @@ const historicoInflacao = [
   ];
   
   exports.historicoInflacao = historicoInflacao;
-
-
-
-
-
-
-
-
-
-
-
-  
