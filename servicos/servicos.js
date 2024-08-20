@@ -11,31 +11,60 @@ const filtrarAno = (valorBusca)=>{
   return historico.filter(valor => valor.ano == valorBusca)
 }
 
-function calculaIPCA(valor, mesInicial, anoInicial, mesFinal, anoFinal){
-  if(isNaN(mesInicial) || isNaN(mesFinal)  || isNaN(anoInicial)  || isNaN(anoFinal)  || isNaN(valor) || mesInicial < 1 || mesInicial > 12 || mesFinal < 1 || mesFinal > 12 || anoInicial > anoFinal || (mesInicial > mesFinal && anoInicial >= anoFinal)){
-    return false
-  } else {
-    
-  let dadosFiltrados = historico.filter(dado => dado.ano >=anoInicial && dado.ano <= anoFinal &&
-    dado.mes >= mesInicial && dado.mes <= mesFinal
-  )
+function calculaIPCA(valor, dataInicialMes, dataInicialAno, dataFinalMes, dataFinalAno) {
+  const historicoFiltrado = historico.filter(
+    historico => {
+      if (dataInicialAno === dataFinalAno) {
+        return historico.ano === dataInicialAno && historico.mes >= dataInicialMes && historico.mes <= dataFinalMes;
+      } else {
+        return (
+          (historico.ano === dataInicialAno && historico.mes >= dataInicialMes) ||
+          (historico.ano > dataInicialAno && historico.ano < dataFinalAno) ||
+          (historico.ano === dataFinalAno && historico.mes <= dataFinalMes)
+        );
+      }
+    }
+  );
 
-  let soma = valor
-
-  for (item of dadosFiltrados){
-    soma *= 1 + (item.ipca / 100)
+  let taxasMensais = 1;
+  for (const elemento of historicoFiltrado) {
+    taxasMensais *= (elemento.ipca / 100) + 1;
   }
 
-  console.log(soma)
-
-  return parseFloat(soma).toFixed(2)
+  const resultado = valor * taxasMensais;
+  return parseFloat(resultado.toFixed(2));
 }
+
+function validacaoErro(valor, dataInicialMes, dataInicialAno, dataFinalMes, dataFinalAno){
+  const anoLimiteFinal = historico[historico.length - 1].ano;
+  const anoLimiteInicial = historico[0].ano
+  const mesLimiteFinal = historico[historico.length - 1].mes;
+  if (
+    isNaN(valor) ||
+    isNaN(dataInicialMes) ||
+    isNaN(dataInicialAno) ||
+    isNaN(dataFinalMes) ||
+    isNaN(dataFinalAno) ||
+    dataInicialMes < 1 || dataInicialMes > 12 ||
+    dataInicialAno < anoLimiteInicial || dataInicialAno > anoLimiteFinal ||
+    dataFinalMes < 1 || dataFinalMes > 12 ||
+    dataFinalAno < anoLimiteInicial || dataFinalAno > anoLimiteFinal ||
+    (dataFinalAno === anoLimiteFinal && dataFinalMes > mesLimiteFinal) ||
+    dataFinalAno < dataInicialAno ||
+    (dataFinalAno == dataInicialAno && dataFinalMes < dataInicialMes)
+  ) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 function buscarId(id){
   return historico.find(valor => valor.id === id)
 }
 
+
+exports.validacaoErro = validacaoErro
 exports.buscarId = buscarId
 exports.buscarHistorico = buscarHistorico
 exports.filtrarAno = filtrarAno
